@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>Dispatch Scanner</title>
+
+<style>
+body{
+font-family:Arial,sans-serif;
+padding:20px;
+max-width:600px;
+margin:auto;
+}
+
+input{
+width:100%;
+padding:12px;
+font-size:18px;
+margin-bottom:10px;
+}
+
+button{
+width:100%;
+padding:15px;
+font-size:18px;
+margin-top:10px;
+}
+
+#list{
+margin-top:20px;
+}
+
+.item{
+padding:8px;
+border-bottom:1px solid #ddd;
+}
+</style>
+</head>
+<body>
+
+<h2>Dispatch Scanner</h2>
+
+<input
+id="invoice"
+placeholder="Invoice Number (Optional)"
+>
+
+<input
+id="manualBarcode"
+placeholder="Test Barcode"
+>
+
+<button onclick="addBarcode()">
+Add Barcode
+</button>
+
+<h3>
+Scans:
+<span id="count">0</span>
+</h3>
+
+<div id="list"></div>
+
+<button onclick="uploadData()">
+Upload
+</button>
+
+<script>
+
+const SCRIPT_URL =
+"https://script.google.com/macros/s/AKfycbwnsVvc874mjP7CVq4U2K1wF21n26BXmqkV5TI2dxB0uPJPCWEwinxihqrWt7RsarI_ng/exec";
+
+let scans = [];
+
+function materialName(code){
+
+const map = {
+A:"ABS",
+C:"PC",
+P:"PP",
+N:"Nylon"
+};
+
+return map[code] || code;
+}
+
+function parseBarcode(barcode){
+
+barcode = barcode.trim();
+
+const datePart = barcode.substring(3,9);
+
+const yy = datePart.substring(0,2);
+const mm = datePart.substring(2,4);
+const dd = datePart.substring(4,6);
+
+return {
+
+barcode,
+
+mfgDate:
+`20${yy}-${mm}-${dd}`,
+
+productCode:
+barcode.substring(9,12),
+
+boxNo:
+barcode.substring(12,15),
+
+material:
+materialName(
+barcode.substring(15,16)
+)
+
+};
+
+}
+
+function render(){
+
+document.getElementById("count")
+.innerText = scans.length;
+
+const list =
+document.getElementById("list");
+
+list.innerHTML = "";
+
+scans.forEach(item=>{
+
+list.innerHTML += `
+<div class="item">
+${item.barcode}
+</div>
+`;
+
+});
+
+}
+
+function addBarcode(){
+
+const barcode =
+document.getElementById("manualBarcode")
+.value;
+
+if(!barcode) return;
+
+scans.push(parseBarcode(barcode));
+
+document.getElementById(
+"manualBarcode"
+).value="";
+
+render();
+
+}
+
+async function uploadData(){
+
+const unique =
+[...new Map(
+scans.map(x=>[
+x.barcode,
+x
+])
+).values()];
+
+const invoice =
+document.getElementById(
+"invoice"
+).value;
+
+const records =
+unique.map(x=>({
+
+invoice,
+...x
+
+}));
+
+const response =
+await fetch(
+SCRIPT_URL,
+{
+method:"POST",
+headers:{
+"Content-Type":
+"application/json"
+},
+body:JSON.stringify({
+records
+})
+}
+);
+
+const result =
+await response.json();
+
+if(result.success){
+
+alert(
+`Uploaded ${records.length} records`
+);
+
+scans=[];
+
+render();
+
+}else{
+
+alert(
+"Upload Failed"
+);
+
+}
+
+}
+
+</script>
+
+</body>
+</html>
