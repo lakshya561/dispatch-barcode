@@ -178,49 +178,61 @@ async function searchBarcode(){
 
 }
 
-    async function scanQRCode(){
+async function scanQRCode(){
 
-    const video =
-        document.getElementById("video");
+    try{
 
-    video.style.display = "block";
+        const video =
+            document.getElementById("video");
 
-    searchReader =
-        new ZXing.BrowserMultiFormatReader();
+        video.style.display = "block";
 
-    searchReader.decodeFromConstraints(
-        {
-            video:{
-                facingMode:"environment"
+        searchReader =
+            new ZXing.BrowserMultiFormatReader();
+
+        await searchReader.decodeFromConstraints(
+            {
+                video:{
+                    facingMode:"environment"
+                }
+            },
+            video,
+            (result, err) => {
+
+                if(result){
+
+                    const barcode =
+                        result.text ||
+                        result.getText();
+
+                    document
+                        .getElementById("barcode")
+                        .value = barcode;
+
+                    beep();
+
+                    if(navigator.vibrate){
+                        navigator.vibrate(100);
+                    }
+
+                    searchReader.reset();
+
+                    video.style.display = "none";
+
+                    searchBarcode();
+                }
+
             }
-        },
-        video,
-       (result, err) => {
+        );
 
-    if(result){
+    }catch(error){
 
-        const barcode =
-            result.text ||
-            result.getText();
+        console.error(error);
 
-        document
-            .getElementById("barcode")
-            .value = barcode;
-
-        beep();
-
-        if(navigator.vibrate){
-            navigator.vibrate(100);
-        }
-
-        searchReader.reset();
-
-        video.style.display = "none";
-
-        searchBarcode();
+        alert(
+            "Camera permission denied or camera unavailable"
+        );
     }
-}
-    );
 }
 
     function beep(){
