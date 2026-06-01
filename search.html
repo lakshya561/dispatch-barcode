@@ -66,6 +66,12 @@ accept="image/*">
 📷 Search From Image
 </button>
 
+    
+<button onclick="refreshPage()">
+🔄 Refresh
+</button>
+    
+
 <div id="result"></div>
 
 <script>
@@ -150,6 +156,16 @@ async function searchBarcode(){
         alert("Search failed");
 
     }
+
+}
+
+    function refreshPage(){
+
+    document.getElementById("barcode").value = "";
+
+    document.getElementById("imageInput").value = "";
+
+    document.getElementById("result").innerHTML = "";
 
 }
 
