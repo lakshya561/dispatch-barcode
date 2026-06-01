@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Barcode Search</title>
+
+<style>
+
+body{
+    font-family:Arial;
+    max-width:700px;
+    margin:auto;
+    padding:20px;
+}
+
+input{
+    width:100%;
+    padding:12px;
+    font-size:16px;
+    box-sizing:border-box;
+}
+
+button{
+    width:100%;
+    padding:12px;
+    margin-top:10px;
+    font-size:16px;
+}
+
+.result{
+    margin-top:20px;
+    border:1px solid #ccc;
+    padding:15px;
+    border-radius:8px;
+}
+
+</style>
+</head>
+
+<body>
+
+<h2>Barcode Search</h2>
+
+<input
+id="barcode"
+placeholder="Enter barcode"
+>
+
+<button onclick="searchBarcode()">
+Search
+</button>
+
+<div id="result"></div>
+
+<script>
+
+const SCRIPT_URL =
+"https://script.google.com/macros/s/AKfycbwnsVvc874mjP7CVq4U2K1wF21n26BXmqkV5TI2dxB0uPJPCWEwinxihqrWt7RsarI_ng/exec";
+
+async function searchBarcode(){
+
+    const barcode =
+        document.getElementById("barcode")
+        .value
+        .trim();
+
+    if(!barcode){
+        alert("Enter barcode");
+        return;
+    }
+
+    try{
+
+        const response =
+            await fetch(
+                `${SCRIPT_URL}?barcode=${encodeURIComponent(barcode)}`
+            );
+
+        const data =
+            await response.json();
+
+        const result =
+            document.getElementById("result");
+
+        if(!data.found){
+
+            result.innerHTML =
+                "<h3>Barcode Not Found</h3>";
+
+            return;
+        }
+
+        result.innerHTML = `
+
+        <div class="result">
+
+            <h3>Found</h3>
+
+            <p><b>Barcode:</b> ${data.barcode}</p>
+
+            <p><b>Invoice:</b> ${data.invoice}</p>
+
+            <p><b>Mfg Date:</b> ${data.mfgDate}</p>
+
+            <p><b>Product Code:</b> ${data.productCode}</p>
+
+            <p><b>Box No:</b> ${data.boxNo}</p>
+
+            <p><b>Material:</b> ${data.material}</p>
+
+            <p><b>Timestamp:</b> ${data.timestamp}</p>
+
+        </div>
+
+        `;
+
+    }catch(error){
+
+        console.error(error);
+
+        alert("Search failed");
+
+    }
+
+}
+
+</script>
+
+</body>
+</html>
