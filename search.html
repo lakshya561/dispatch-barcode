@@ -49,9 +49,27 @@ id="barcode"
 placeholder="Enter barcode"
 >
 
+
 <button onclick="searchBarcode()">
 Search
 </button>
+
+    <button onclick="scanQRCode()">
+📷 Scan QR
+</button>
+
+    <video
+id="video"
+style="
+width:100%;
+display:none;
+border:1px solid #ccc;
+border-radius:8px;
+margin-top:10px;
+">
+</video>
+
+    
 
     <hr>
 
@@ -75,6 +93,7 @@ accept="image/*">
 <div id="result"></div>
 
 <script>
+    let searchReader = null;
 
 const SCRIPT_URL =
 "https://script.google.com/macros/s/AKfycbwnsVvc874mjP7CVq4U2K1wF21n26BXmqkV5TI2dxB0uPJPCWEwinxihqrWt7RsarI_ng/exec";
@@ -158,6 +177,81 @@ async function searchBarcode(){
     }
 
 }
+
+    async function scanQRCode(){
+
+    const video =
+        document.getElementById("video");
+
+    video.style.display = "block";
+
+    searchReader =
+        new ZXing.BrowserMultiFormatReader();
+
+    searchReader.decodeFromConstraints(
+        {
+            video:{
+                facingMode:"environment"
+            }
+        },
+        video,
+       (result, err) => {
+
+    if(result){
+
+        const barcode =
+            result.text ||
+            result.getText();
+
+        document
+            .getElementById("barcode")
+            .value = barcode;
+
+        beep();
+
+        if(navigator.vibrate){
+            navigator.vibrate(100);
+        }
+
+        searchReader.reset();
+
+        video.style.display = "none";
+
+        searchBarcode();
+    }
+}
+    );
+}
+
+    function beep(){
+
+    const ctx =
+        new (window.AudioContext ||
+             window.webkitAudioContext)();
+
+    const oscillator =
+        ctx.createOscillator();
+
+    const gain =
+        ctx.createGain();
+
+    oscillator.connect(gain);
+    gain.connect(ctx.destination);
+
+    oscillator.frequency.value = 1000;
+
+    oscillator.start();
+
+    gain.gain.exponentialRampToValueAtTime(
+        0.0001,
+        ctx.currentTime + 0.1
+    );
+
+    oscillator.stop(
+        ctx.currentTime + 0.1
+    );
+}
+    
 
     function refreshPage(){
 
