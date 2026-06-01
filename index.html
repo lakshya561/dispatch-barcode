@@ -83,6 +83,10 @@ Scans: <span id="count">0</span>
 ⛔ Stop Scanning
 </button>
 
+<button onclick="toggleTorch()">
+🔦 Torch
+</button>
+
 <video id="video"></video>
 
 <button onclick="uploadData()">
@@ -100,6 +104,8 @@ let scans = [];
 let codeReader = null;
 let lastScan = "";
 let lastTime = 0;
+let torchOn = false;
+let currentTrack = null;
 
 function materialName(code){
 
@@ -199,6 +205,21 @@ async function startScanner(){
 
         const video =
             document.getElementById("video");
+        video.addEventListener("loadedmetadata", () => {
+
+    const stream = video.srcObject;
+
+    if (stream) {
+
+        currentTrack =
+            stream.getVideoTracks()[0];
+
+        console.log("Camera track found");
+
+    }
+
+});
+        
 
         const devices =
             await codeReader.listVideoInputDevices();
@@ -273,6 +294,38 @@ function stopScanner(){
     }
 }
 
+    async function toggleTorch() {
+
+    if (!currentTrack) {
+        alert("Start scanner first");
+        return;
+    }
+
+    const capabilities = currentTrack.getCapabilities();
+
+    if (!capabilities.torch) {
+        alert("Torch not supported on this device");
+        return;
+    }
+
+    try {
+
+        torchOn = !torchOn;
+
+        await currentTrack.applyConstraints({
+            advanced: [{
+                torch: torchOn
+            }]
+        });
+
+    } catch (err) {
+
+        console.error(err);
+        alert("Unable to control torch");
+
+    }
+}
+    
 async function uploadData(){
 
     if(scans.length === 0){
