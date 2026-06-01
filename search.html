@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+<script src="https://unpkg.com/@zxing/library@latest"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -139,7 +140,60 @@ async function searchBarcode(){
 
 }
 
-</script>
+    async function searchFromImage(){
 
+    const file =
+        document.getElementById("imageInput")
+        .files[0];
+
+    if(!file){
+
+        alert("Please select an image");
+
+        return;
+    }
+
+    const img =
+        document.getElementById("previewImage");
+
+    img.src =
+        URL.createObjectURL(file);
+
+    img.onload = async () => {
+
+        try{
+
+            const reader =
+                new ZXing.BrowserQRCodeReader();
+
+            const result =
+                await reader.decodeFromImageElement(img);
+
+            const barcode =
+                result.getText();
+
+            document.getElementById("barcode")
+                .value = barcode;
+
+            searchBarcode();
+
+        }catch(error){
+
+            console.error(error);
+
+            alert(
+                "No QR code found in image"
+            );
+
+        }
+
+    };
+
+}
+
+</script>
+<img
+id="previewImage"
+style="display:none;">
 </body>
 </html>
