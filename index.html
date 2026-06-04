@@ -123,7 +123,7 @@ function parseBarcode(barcode){
 
     barcode = barcode.trim();
 
-    if(!/^Sn\/\d{12}[A-Z]$/.test(barcode)){
+    if(!/^Sn\/[A-Z0-9]{12}[A-Z]$/.test(barcode)){
         return null;
     }
 
@@ -266,15 +266,17 @@ video,
                     lastTime = now;
 
                    const parsed =
-                    parseBarcode(barcode);
+    parseBarcode(barcode);
 
-                    if(parsed){
-                    scans.push(parsed);
-                    }
+if(!parsed){
+    return;
+}
 
-                    render();
+scans.push(parsed);
 
-                    beep();
+render();
+
+beep();
                     if(navigator.vibrate){
     navigator.vibrate(100);
 }
