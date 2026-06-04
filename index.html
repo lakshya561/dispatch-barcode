@@ -123,6 +123,10 @@ function parseBarcode(barcode){
 
     barcode = barcode.trim();
 
+    if(!/^Sn\/\d{12}[A-Z]$/.test(barcode)){
+        return null;
+    }
+
     const datePart = barcode.substring(3,9);
 
     const yy = datePart.substring(0,2);
@@ -261,9 +265,12 @@ video,
                     lastScan = barcode;
                     lastTime = now;
 
-                    scans.push(
-                        parseBarcode(barcode)
-                    );
+                   const parsed =
+                    parseBarcode(barcode);
+
+                    if(parsed){
+                    scans.push(parsed);
+                    }
 
                     render();
 
