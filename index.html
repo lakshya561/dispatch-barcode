@@ -59,6 +59,27 @@ button{
 .success{
     color:green;
 }
+
+    #cameraContainer{
+    position:relative;
+}
+
+#scanFlash{
+    position:absolute;
+    width:1cm;
+    height:1cm;
+    background:red;
+    border-radius:50%;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    display:none;
+    pointer-events:none;
+    z-index:1000;
+    box-shadow:0 0 20px red;
+}
+
+    
 </style>
 </head>
 
@@ -87,7 +108,10 @@ Scans: <span id="count">0</span>
 🔦 Torch
 </button>
 
-<video id="video"></video>
+<div id="cameraContainer">
+    <video id="video"></video>
+    <div id="scanFlash"></div>
+</div>
 
 <button onclick="uploadData()">
 ☁ Upload
@@ -118,7 +142,21 @@ function materialName(code){
 
     return map[code] || code;
 }
+    
+function flashRedDot(){
 
+    const dot =
+        document.getElementById("scanFlash");
+
+    dot.style.display = "block";
+
+    setTimeout(() => {
+
+        dot.style.display = "none";
+
+    }, 200); // 0.2 second
+}
+    
 function parseBarcode(barcode){
 
     barcode = barcode.trim();
@@ -177,29 +215,34 @@ function beep(){
         new (window.AudioContext ||
              window.webkitAudioContext)();
 
-    const oscillator =
+    const osc =
         ctx.createOscillator();
 
     const gain =
         ctx.createGain();
 
-    oscillator.connect(gain);
+    osc.type = "square";
+    osc.frequency.value = 1800;
+
+    gain.gain.setValueAtTime(
+        0.8,
+        ctx.currentTime
+    );
+
+    osc.connect(gain);
     gain.connect(ctx.destination);
 
-    oscillator.frequency.value = 1000;
-
-    oscillator.start();
+    osc.start();
 
     gain.gain.exponentialRampToValueAtTime(
-        0.0001,
-        ctx.currentTime + 0.1
+        0.001,
+        ctx.currentTime + 0.08
     );
 
-    oscillator.stop(
-        ctx.currentTime + 0.1
+    osc.stop(
+        ctx.currentTime + 0.08
     );
 }
-
 async function startScanner(){
 
     try{
@@ -277,6 +320,8 @@ scans.push(parsed);
 render();
 
 beep();
+
+flashRedDot();
                     if(navigator.vibrate){
     navigator.vibrate(100);
 }
