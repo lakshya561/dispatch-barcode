@@ -79,6 +79,17 @@ button{
     box-shadow:0 0 20px red;
 }
 
+    button{
+    width:100%;
+    padding:14px;
+    margin-top:10px;
+    font-size:16px;
+    cursor:pointer;
+    transition:opacity 0.3s ease;
+}
+
+    
+
     
 </style>
 </head>
@@ -113,7 +124,7 @@ Scans: <span id="count">0</span>
     <div id="scanFlash"></div>
 </div>
 
-<button onclick="uploadData()">
+<button id="uploadBtn" onclick="uploadData()">
 ☁ Upload
 </button>
 
@@ -382,9 +393,22 @@ function stopScanner(){
     
 async function uploadData(){
 
+    const btn =
+        document.getElementById("uploadBtn");
+
+    if(btn.disabled){
+        return;
+    }
+
+    btn.disabled = true;
+    btn.style.opacity = "0.5";
+
     if(scans.length === 0){
 
         alert("No scans found");
+
+        btn.disabled = false;
+        btn.style.opacity = "1";
 
         return;
     }
