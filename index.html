@@ -87,6 +87,15 @@ button{
     cursor:pointer;
     transition:opacity 0.3s ease;
 }
+
+    #uniqueStats{
+    text-align:center;
+    font-size:22px;
+    font-weight:bold;
+    margin:10px 0;
+}
+
+    
        
 </style>
 </head>
@@ -115,6 +124,12 @@ Scans: <span id="count">0</span>
 <button onclick="toggleTorch()">
 🔦 Torch
 </button>
+
+    <div id="uniqueStats">
+    Unique Scans: <span id="uniqueCount">0</span>
+</div>
+
+    
 
 <div id="cameraContainer">
     <video id="video"></video>
@@ -198,8 +213,16 @@ function parseBarcode(barcode){
 
 function render(){
 
+    const uniqueCount =
+        new Set(
+            scans.map(x => x.barcode)
+        ).size;
+
     document.getElementById("count").innerText =
-        scans.length;
+        uniqueCount;
+
+    document.getElementById("uniqueCount").innerText =
+        uniqueCount;
 
     const list =
         document.getElementById("list");
@@ -216,6 +239,7 @@ function render(){
 
     });
 }
+    
 
 function beep(){
 
