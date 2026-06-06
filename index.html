@@ -109,10 +109,6 @@ id="invoice"
 placeholder="Invoice Number (Optional)"
 >
 
-<div id="stats">
-Scans: <span id="count">0</span>
-</div>
-
 <button onclick="startScanner()">
 📷 Start Scanning
 </button>
@@ -125,8 +121,8 @@ Scans: <span id="count">0</span>
 🔦 Torch
 </button>
 
-    <div id="uniqueStats">
-    Unique Scans: <span id="uniqueCount">0</span>
+   <div id="uniqueStats">
+    Total Boxes Scanned: <span id="uniqueCount">0</span>
 </div>
 
     
@@ -217,9 +213,6 @@ function render(){
         new Set(
             scans.map(x => x.barcode)
         ).size;
-
-    document.getElementById("count").innerText =
-        uniqueCount;
 
     document.getElementById("uniqueCount").innerText =
         uniqueCount;
@@ -506,6 +499,5 @@ async function uploadData(){
 }
 
 </script>
-</div>
 </body>
 </html>
