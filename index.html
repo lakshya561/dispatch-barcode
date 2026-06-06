@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-
+    
 <title>Dispatch Scanner</title>
 
 <script src="https://unpkg.com/@zxing/library@latest"></script>
@@ -455,13 +455,17 @@ async function uploadData(){
 
         if(result.success){
 
-            alert(
-                `Uploaded ${records.length} unique records`
-            );
+    alert(
+        `Uploaded ${records.length} unique records`
+    );
 
-            scans = [];
+    scans = [];
 
-            render();
+    render();
+
+    btn.disabled = false;
+    btn.style.opacity = "1";
+}
 
         }else{
 
