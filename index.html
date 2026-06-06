@@ -463,7 +463,6 @@ async function uploadData(){
 
     btn.disabled = false;
     btn.style.opacity = "1";
-}
 
         }else{
             alert(
@@ -471,14 +470,15 @@ async function uploadData(){
             );
         }
 
-    }catch(error){
+   }catch(error){
 
-        console.error(error);
+    console.error(error);
 
-        alert(
-            "Upload failed"
-        );
-    }
+    alert("Upload failed");
+
+    btn.disabled = false;
+    btn.style.opacity = "1";
+}
 }
 
 </script>
