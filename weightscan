@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>Weight Reader</title>
+
+<style>
+
+body{
+    font-family:Arial,sans-serif;
+    text-align:center;
+    margin:20px;
+}
+
+h2{
+    margin-bottom:20px;
+}
+
+#cameraContainer{
+    position:relative;
+    display:inline-block;
+    width:100%;
+    max-width:700px;
+}
+
+#video{
+    width:100%;
+    border:1px solid #ccc;
+    border-radius:8px;
+}
+
+#roi{
+    position:absolute;
+    width:220px;
+    height:80px;
+    border:3px solid red;
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-50%);
+    pointer-events:none;
+}
+
+button{
+    margin-top:15px;
+    padding:12px 20px;
+    font-size:16px;
+}
+
+canvas{
+    margin-top:20px;
+    border:1px solid #ccc;
+    max-width:100%;
+}
+
+#status{
+    margin-top:15px;
+    font-size:18px;
+    font-weight:bold;
+}
+
+</style>
+</head>
+
+<body>
+
+<h2>Weight Reader</h2>
+
+<div id="cameraContainer">
+
+    <video
+        id="video"
+        autoplay
+        playsinline>
+    </video>
+
+    <div id="roi"></div>
+
+</div>
+
+<br>
+
+<button onclick="startCamera()">
+Start Camera
+</button>
+
+<div id="status">
+Waiting for camera...
+</div>
+
+<br>
+
+<canvas id="canvas"></canvas>
+
+<script>
+
+const video =
+    document.getElementById("video");
+
+const canvas =
+    document.getElementById("canvas");
+
+const ctx =
+    canvas.getContext("2d");
+
+let captureTimer = null;
+
+async function startCamera(){
+
+    try{
+
+        const stream =
+            await navigator.mediaDevices.getUserMedia({
+                video:{
+                    facingMode:"environment"
+                }
+            });
+
+        video.srcObject = stream;
+
+        document.getElementById("status")
+            .innerText =
+            "Camera Started";
+
+        video.onloadedmetadata = () => {
+
+            if(captureTimer){
+                clearInterval(captureTimer);
+            }
+
+            captureTimer =
+                setInterval(
+                    captureRegion,
+                    500
+                );
+
+        };
+
+    }
+    catch(err){
+
+        console.error(err);
+
+        document.getElementById("status")
+            .innerText =
+            "Camera Error";
+
+    }
+}
+
+function captureRegion(){
+
+    if(video.videoWidth === 0){
+        return;
+    }
+
+    const roiWidth = 220;
+    const roiHeight = 80;
+
+    const sx =
+        (video.videoWidth / 2) -
+        (roiWidth / 2);
+
+    const sy =
+        (video.videoHeight / 2) -
+        (roiHeight / 2);
+
+    canvas.width = roiWidth;
+    canvas.height = roiHeight;
+
+    ctx.drawImage(
+        video,
+        sx,
+        sy,
+        roiWidth,
+        roiHeight,
+        0,
+        0,
+        roiWidth,
+        roiHeight
+    );
+
+    const imageData =
+        ctx.getImageData(
+            0,
+            0,
+            roiWidth,
+            roiHeight
+        );
+
+    const data =
+        imageData.data;
+
+    for(let i=0;i<data.length;i+=4){
+
+        const gray =
+            (
+                data[i] +
+                data[i+1] +
+                data[i+2]
+            ) / 3;
+
+        const value =
+            gray > 120
+                ? 255
+                : 0;
+
+        data[i] = value;
+        data[i+1] = value;
+        data[i+2] = value;
+    }
+
+    ctx.putImageData(
+        imageData,
+        0,
+        0
+    );
+}
+
+</script>
+
+</body>
+</html>
